@@ -35,16 +35,22 @@ class Settings:
     ]
 
     # URL base de la Books API
-    NYT_BOOKS_BASE_URL: str = "https://api.nytimes.com/svc/books/v3"
+    NYT_BOOKS_BASE_URL: str = os.getenv(
+        "NYT_BOOKS_BASE_URL",
+        "https://api.nytimes.com/svc/books/v3"
+    )
 
     # URL base de la Article Search API (para reseñas literarias)
-    NYT_SEARCH_BASE_URL: str = "https://api.nytimes.com/svc/search/v2"
+    NYT_SEARCH_BASE_URL: str = os.getenv(
+        "NYT_SEARCH_BASE_URL",
+        "https://api.nytimes.com/svc/search/v2"
+    )
 
     # Tiempo máximo de espera para peticiones HTTP al NYT (segundos)
-    HTTP_TIMEOUT: float = 15.0
+    HTTP_TIMEOUT: float = float(os.getenv("HTTP_TIMEOUT", "15.0"))
 
     # Máximo de resultados por página en búsquedas
-    MAX_RESULTS: int = 20
+    MAX_RESULTS: int = int(os.getenv("MAX_RESULTS", "20"))
 
     def validate(self) -> None:
         """Valida que la API Key esté configurada."""
