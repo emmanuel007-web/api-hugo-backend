@@ -1,0 +1,25 @@
+# =============================================================================
+# Dependencias del Backend - NYTimes Books API Proxy (FastAPI)
+# =============================================================================
+# Instalar con: pip install -r requirements.txt
+
+# Framework web asíncrono
+fastapi==0.111.0
+
+# Servidor ASGI de alta performance
+uvicorn[standard]==0.30.1
+
+# Cliente HTTP asíncrono para llamar al NYT
+httpx==0.27.0
+
+# Carga de variables de entorno desde .env
+python-dotenv==1.0.1
+
+# Validación de datos y serialización
+pydantic==2.7.1
+
+# Extensiones de tipos para Pydantic (requerido por FastAPI)
+pydantic-settings==2.2.1
+
+# Para manejo de formularios en FastAPI (opcional pero recomendado)
+python-multipart==0.0.9
