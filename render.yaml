@@ -1,41 +1,20 @@
-# =====================================================================
-# Render.com Service Configuration — FastAPI Backend
-# =====================================================================
 services:
   - type: web
-    name: nytimes-books-backend
+    name: api-hugo-backend
     runtime: python
     region: ohio
     plan: free
-    rootDir: .
-    buildCommand: |
-      if [ -f requirements.txt ]; then
-        pip install -r requirements.txt
-      elif [ -f backend/requirements.txt ]; then
-        cd backend
-        pip install -r requirements.txt
-      else
-        echo "requirements.txt not found"
-        exit 1
-      fi
-    startCommand: |
-      if [ -f app/main.py ]; then
-        uvicorn app.main:app --host 0.0.0.0 --port $PORT
-      elif [ -f backend/app/main.py ]; then
-        cd backend
-        uvicorn app.main:app --host 0.0.0.0 --port $PORT
-      else
-        echo "FastAPI entrypoint app/main.py not found"
-        exit 1
-      fi
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.11"
       - key: NYTIMES_API_KEY
-        sync: false          # Set manually in Render dashboard
+        sync: false
       - key: FRONTEND_ORIGINS
         value: https://apihugofrontend.vercel.app
       - key: NYT_BOOKS_BASE_URL
         value: https://api.nytimes.com/svc/books/v3
       - key: NYT_SEARCH_BASE_URL
         value: https://api.nytimes.com/svc/search/v2
-      - key: PYTHON_VERSION
-        value: "3.11"
