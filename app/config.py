@@ -24,6 +24,16 @@ class Settings:
     # API Key de NYTimes - se lee desde .env (NUNCA hardcodeada)
     NYT_API_KEY: str = os.getenv("NYTIMES_API_KEY", "")
 
+    # Orígenes permitidos para CORS. Se configuran como CSV en Render.
+    FRONTEND_ORIGINS: list[str] = [
+        origin.strip()
+        for origin in os.getenv(
+            "FRONTEND_ORIGINS",
+            "http://localhost:4200,http://localhost:3000,https://apihugofrontend.vercel.app",
+        ).split(",")
+        if origin.strip()
+    ]
+
     # URL base de la Books API
     NYT_BOOKS_BASE_URL: str = "https://api.nytimes.com/svc/books/v3"
 

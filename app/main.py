@@ -12,6 +12,7 @@ Stack: Python 3.11+ | FastAPI | Uvicorn | python-dotenv | httpx
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import get_settings
 from app.routers import books, search
 
 # ---------------------------------------------------------------------------
@@ -36,18 +37,14 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+settings = get_settings()
+
 # ---------------------------------------------------------------------------
 # Configuración de CORS - permite peticiones desde Angular (localhost:4200)
 # ---------------------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:4200",   # Angular dev server
-        ""
-    
-        "https://apihugofrontend.vercel.app", # Angular en producción (Vercel)
-        "http://localhost:3000",
-    ],
+    allow_origins=settings.FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
