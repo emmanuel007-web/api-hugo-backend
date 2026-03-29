@@ -219,12 +219,39 @@ async def get_nonfiction_combined():
 async def get_list_names():
     """Obtiene todos los nombres de las listas de best-sellers disponibles."""
     url = f"{BASE}/lists/names.json"
-    data = await fetch_nyt(url, {})
+    
+    # Fallback predefinido con las listas más populares
+    # por si la API del NYT tiene fallos en este endpoint específico (error común "list not found")
+    fallback_lists = [
+        {"list_name": "Hardcover Fiction", "list_name_encoded": "hardcover-fiction"},
+        {"list_name": "Hardcover Nonfiction", "list_name_encoded": "hardcover-nonfiction"},
+        {"list_name": "Trade Fiction Paperback", "list_name_encoded": "trade-fiction-paperback"},
+        {"list_name": "Paperback Nonfiction", "list_name_encoded": "paperback-nonfiction"},
+        {"list_name": "Advice How-To and Miscellaneous", "list_name_encoded": "advice-how-to-and-miscellaneous"},
+        {"list_name": "Childrens Middle Grade Hardcover", "list_name_encoded": "childrens-middle-grade-hardcover"},
+        {"list_name": "Picture Books", "list_name_encoded": "picture-books"},
+        {"list_name": "Series Books", "list_name_encoded": "series-books"},
+        {"list_name": "Young Adult Hardcover", "list_name_encoded": "young-adult-hardcover"}
+    ]
+    
+    try:
+        data = await fetch_nyt(url, {})
+        results = data.get("results") or []
+        if not results:
+            results = fallback_lists
+    except HTTPException as e:
+        # Si el NYT responde 404 "list not found" o hay otro error, usamos el fallback
+        if e.status_code == 404 or e.status_code >= 500:
+            results = fallback_lists
+            data = {"num_results": len(results)}
+        else:
+            raise e
+
     return {
         "status": "success",
         "endpoint": "list_names",
-        "num_results": data.get("num_results", 0),
-        "results": data.get("results") or []
+        "num_results": data.get("num_results", len(results)),
+        "results": results
     }
 
 
