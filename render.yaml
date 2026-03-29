@@ -13,7 +13,7 @@ services:
       - key: NYTIMES_API_KEY
         sync: false
       - key: FRONTEND_ORIGINS
-        value: https://apihugofrontend.vercel.app
+        value: https://front-hugo-api.vercel.app
       - key: NYT_BOOKS_BASE_URL
         value: https://api.nytimes.com/svc/books/v3
       - key: NYT_SEARCH_BASE_URL
