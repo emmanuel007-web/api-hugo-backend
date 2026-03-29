@@ -81,20 +81,18 @@ async def search_popular_nonfiction_authors(
 ):
     """
     Endpoint 6: Obtiene los autores más populares de la categoría Hardcover Nonfiction.
-    Los ordena por semanas totales en la lista (popularidad).
+    Si se provee un 'query' con el nombre de autor, busca en el historial completo
+    del NYT (history API) todos los libros de ese autor.
     """
-    url = f"{BOOKS_BASE}/lists/current/hardcover-nonfiction.json"
-    data = await fetch_nyt(url, {})
+    # 1. Obtener SIEMPRE la lista actual de hardcover-nonfiction para el ranking de autores
+    url_current = f"{BOOKS_BASE}/lists/current/hardcover-nonfiction.json"
+    data_current = await fetch_nyt(url_current, {})
 
-    results_raw = data.get("results") or {}
+    results_raw = data_current.get("results") or {}
     books_raw = results_raw.get("books") or []
 
     # Extraer autores y su popularidad (weeks_on_list)
     author_map = {}
-    matched_books = []
-    
-    query_lower = query.strip().lower() if query else None
-
     for book in books_raw:
         author = book.get("author", "Autor desconocido")
         weeks = book.get("weeks_on_list", 0)
@@ -103,31 +101,40 @@ async def search_popular_nonfiction_authors(
         if author not in author_map or weeks > author_map[author]:
             author_map[author] = weeks
             
-        # Filtrar libros si hay query
-        if not query_lower or query_lower in author.lower():
-            matched_books.append({
-                "rank": book.get("rank"),
-                "title": book.get("title"),
-                "author": author,
-                "description": book.get("description", ""),
-                "publisher": book.get("publisher"),
-                "book_image": book.get("book_image"),
-                "weeks_on_list": weeks,
-                "primary_isbn13": book.get("primary_isbn13")
-            })
-
     # Convertir mapa a lista y ordenar por semanas (popularidad)
     all_authors = []
     for auth, wks in author_map.items():
-        if not query_lower or query_lower in auth.lower():
-            all_authors.append({
-                "name": auth,
-                "book_count": wks, # Usamos book_count para representar "popularidad" en la interfaz
-                "primary_list": "Hardcover Nonfiction"
-            })
+        all_authors.append({
+            "name": auth,
+            "book_count": wks, # Usamos book_count para representar "popularidad" en la interfaz
+            "primary_list": "Hardcover Nonfiction"
+        })
             
     # Ordenar autores por "popularidad" (semanas en lista)
     all_authors.sort(key=lambda x: x["book_count"], reverse=True)
+
+    matched_books = []
+    
+    # 2. Si hay un query (nombre de autor), buscar sus libros en la misma lista actual
+    query_lower = query.strip().lower() if query else None
+
+    # Iterar de nuevo sobre la lista actual para extraer los libros del autor seleccionado
+    if query_lower:
+        for book in books_raw:
+            author = book.get("author", "Autor desconocido")
+            if query_lower in author.lower():
+                matched_books.append({
+                    "rank": book.get("rank"),
+                    "title": book.get("title", "Sin título"),
+                    "author": author,
+                    "description": book.get("description", ""),
+                    "publisher": book.get("publisher", ""),
+                    "primary_isbn13": book.get("primary_isbn13", ""),
+                    "book_image": book.get("book_image", ""),
+                    "weeks_on_list": book.get("weeks_on_list", 0),
+                    # Para compatibilidad con frontend
+                    "found_in_lists": ["Hardcover Nonfiction"]
+                })
 
     return {
         "status": "success",
